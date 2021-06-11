@@ -1,15 +1,15 @@
 package code.hackathon.unisubscribe.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+
+@Getter
+@Setter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,6 +25,7 @@ public class Client {
     private String email;
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Company> companies;
     @Column(name = "phone_number")
     private String phoneNumber;

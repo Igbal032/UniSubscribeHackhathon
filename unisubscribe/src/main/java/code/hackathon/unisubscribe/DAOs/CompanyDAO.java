@@ -12,7 +12,7 @@ public interface CompanyDAO {
 
     Company deleteCompany(long clientId,long companyId);
 
-    Company updateCompany(Company company);
+    Company updateCompany(long clientId,Company company);
 
     Company getCompany(long clientId,long companyId);
 }

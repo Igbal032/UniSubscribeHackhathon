@@ -5,8 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
+
 public interface CompanyRepository  extends CrudRepository<Company, Long> {
 
-    Company getById(long clientId);
+    Company getCompanyById(long companyId);
+
+    @Query(value = "select * from companies c where c.user_id = ?1 ", nativeQuery = true)
+    List<Company> getCompanies(long clientId);
 
 }

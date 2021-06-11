@@ -11,8 +11,10 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,27 +23,16 @@ public class CompanyDAOImpl implements CompanyDAO{
     @PersistenceContext
     EntityManager entityManager;
 
-
-    CompanyRepository  companyRepository;
-    ClientRepository clientRepository;
-    public CompanyDAOImpl(CompanyRepository companyRepository,ClientRepository clientRepository) {
-        this.companyRepository = companyRepository;
-        this.clientRepository = clientRepository;
-    }
+    private final CompanyRepository  companyRepository;
+    private final ClientRepository clientRepository;
 
     @Override
     public List<Company> allCompanies(long clientId) {
-//        List<Company> companies = entityManager
-//                .createQuery("SELECT client.companies FROM Client client WHERE client.id = :id", Company.class)
-//                .setParameter("id", clientId).getResultList();
-        List<Company> all = clientRepository.findById(clientId).get().getCompanies();
-        System.out.println(all);
-        if (all==null){
-            throw new CompanyNotFound("sasa");
-        }
-        else {
-            return all;
-        }
+        Client client = clientRepository.getClientById(clientId);
+        System.out.println(client.getName()+" Name");
+        if (client==null)
+            throw new CompanyNotFound("NOt Found");
+        return client.getCompanies();
     }
 
     @Override
@@ -49,50 +40,48 @@ public class CompanyDAOImpl implements CompanyDAO{
         System.out.println(company+ " company");
         System.out.println(clientId+ " clientId");
         Client client = clientRepository.getClientById(clientId);
-         client.getCompanies().add(company);
-        System.out.println(company);
-//        Client client = entityManager.createQuery("SELECT client FROM Client client WHERE client.id = :id", Client.class)
-//                .setParameter("id", clientId).getSingleResult();
-//        if (client==null){
-//            throw new ClientNotFound("Client not found");
-//        }else{
-//
-//        }
-//
-//
-//        Company addedCompany = entityManager
-//                .createNativeQuery("Insert :c into Company company WHERE company.client = :id", Company.class)
-//                .setParameter("id", clientId).getSingleResult();
+        company.setClient(client);
+        companyRepository.save(company);
         return company;
     }
 
     @Override
     public Company deleteCompany(long clientId,long companyId) {
-        Company findCompany = companyRepository.getById(companyId);
+        Company findCompany = companyRepository.getCompanyById(companyId);
         findCompany.setDeletedDate(LocalDate.now());
         companyRepository.save(findCompany);
 
         return findCompany;
     }
 
+    @Transactional
     @Override
-    public Company updateCompany(Company company) {
-        return companyRepository.save(company);
+    public Company updateCompany(long companyId,Company company) {
+        System.out.println(company);
+        Company comp = companyRepository.getCompanyById(companyId);
+        if (comp==null)
+            throw new CompanyNotFound("Not Fount");
+        comp.setCompanyName(company.getCompanyName());
+        comp.setPrice(company.getPrice());
+        comp.setDetail(company.getDetail());
+        comp.setCategory(company.getCategory());
+        comp.setLink(company.getLink());
+        comp.setClient(company.getClient());
+        comp.setExpiredDate(company.getExpiredDate());
+        comp.setTime(company.isTime());
+        comp.setNotifyDate(company.getNotifyDate());
+        comp.setNotificationDate(company.getNotificationDate());
+        companyRepository.save(comp);
+        return comp;
     }
 
     @Override
     public Company getCompany(long clientId, long companyId) {
-        Company  foundedCompany = null;
-        List<Company> companies = entityManager
-                .createQuery("SELECT client.companies FROM Client client WHERE client.id = :id", Company.class)
-                .setParameter("id", clientId).getResultList();
-        foundedCompany = companies.stream().filter(i-> i.getId()==companyId).findFirst().get();
-        if (foundedCompany==null){
+        Client client = clientRepository.getClientById(clientId);
+        Optional<Company> companies = client.getCompanies().stream().filter(w->w.getId()==companyId&&w.getDeletedDate()==null).findFirst();
+        if (!companies.isPresent()){
             throw new CompanyNotFound("Company not found");
         }
-        else {
-            return foundedCompany;
-        }
-
+        return companies.get();
     }
 }

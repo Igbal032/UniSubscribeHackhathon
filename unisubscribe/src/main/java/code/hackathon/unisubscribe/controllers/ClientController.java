@@ -3,9 +3,12 @@ package code.hackathon.unisubscribe.controllers;
 
 import code.hackathon.unisubscribe.DTOs.ClientDTO;
 import code.hackathon.unisubscribe.DTOs.CompanyDTO;
+import code.hackathon.unisubscribe.enums.Category;
 import code.hackathon.unisubscribe.models.Client;
 import code.hackathon.unisubscribe.services.ClientService;
 import code.hackathon.unisubscribe.services.CompanyService;
+import code.hackathon.unisubscribe.services.CompanyServiceImpl;
+import code.hackathon.unisubscribe.utils.Pagination;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +16,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("api/clients")
@@ -46,43 +54,101 @@ public class ClientController {
     get all companies with user id
      */
     @GetMapping("/{clientId}/companies")
-    public ResponseEntity<List<CompanyDTO>> getCompanies(@PathVariable long clientId){
+    public ResponseEntity<?> getCompanies(@PathVariable long clientId, @RequestParam(required = false) Integer pageNumber,
+                                                         @RequestParam(required = false) Integer countOfData,
+                                                         HttpServletRequest httpServletRequest){
+
         List<CompanyDTO> companyDTOList = companyService.allCompanies(clientId);
-        logger.info("Get All Companies");
-        return new ResponseEntity<>(companyDTOList,HttpStatus.OK);
+        if (pageNumber!=null&&countOfData!=null){
+            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            return new ResponseEntity<>(pagination, HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
     }
+
 
     /*
     create company
      */
     @PostMapping("/{clientId}/companies")
-    public ResponseEntity<List<CompanyDTO>> createCompany(@PathVariable long clientId,@RequestBody CompanyDTO companyDTO){
+    public ResponseEntity<?> createCompany(@PathVariable long clientId,@RequestBody CompanyDTO companyDTO,
+                                                          @RequestParam(required = false) Integer pageNumber,
+                                                          @RequestParam(required = false) Integer countOfData,
+                                                          HttpServletRequest httpServletRequest){
         companyService.addCompany(clientId,companyDTO);
         List<CompanyDTO> companyDTOList = companyService.allCompanies(clientId);
         logger.info("Create Company");
-        return new ResponseEntity<>(companyDTOList,HttpStatus.OK);
+        if (pageNumber!=null&&countOfData!=null){
+            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            return new ResponseEntity<>(pagination, HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
     }
     /*
     get company
      */
-    @GetMapping("/{clientId}/{companyId}")
+    @GetMapping("/{clientId}/companies/{companyId}")
     public ResponseEntity<CompanyDTO> getCompany(@PathVariable long clientId,@PathVariable long companyId){
         CompanyDTO newCompanyDTO = companyService.getCompany(clientId,companyId);
         logger.info("Get Company");
         return new ResponseEntity<>(newCompanyDTO,HttpStatus.OK);
     }
 
-    @DeleteMapping("{clientId}/delete/{companyId}")
-    public ResponseEntity<List<CompanyDTO>> deleteCompany(@PathVariable long clientId,@PathVariable long companyId){
+    @DeleteMapping("{clientId}/companies/delete/{companyId}")
+    public ResponseEntity<?> deleteCompany(@PathVariable long clientId,@PathVariable long companyId,
+                                                          @RequestParam(required = false) Integer pageNumber,
+                                                          @RequestParam(required = false) Integer countOfData,
+                                                          HttpServletRequest httpServletRequest){
         List<CompanyDTO> companyDTOList =  companyService.deleteCompany(clientId,companyId);
-        logger.info("Delete Company");
-        return new ResponseEntity<>(companyDTOList,HttpStatus.OK);
+        if (pageNumber!=null&&countOfData!=null){
+            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            return new ResponseEntity<>(pagination, HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
     }
     @GetMapping("/{clientId}/companies/deletedCompanies")
-    public ResponseEntity<List<CompanyDTO>> getDeletedCompanies(@PathVariable long clientId){
+    public ResponseEntity<?> getDeletedCompanies(@PathVariable long clientId,
+                                                 @RequestParam(required = false) Integer pageNumber,
+                                                 @RequestParam(required = false) Integer countOfData,
+                                                 HttpServletRequest httpServletRequest){
         List<CompanyDTO> companyDTOList = companyService.deletedCompanies(clientId);
-        logger.info("Get Deleted Companies");
-        return new ResponseEntity<>(companyDTOList,HttpStatus.OK);
+        if (pageNumber!=null&&countOfData!=null){
+            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            return new ResponseEntity<>(pagination, HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
     }
+
+    @PutMapping("/{clientId}/companies/update/{companyId}")
+    public ResponseEntity<?> updateCompany(@PathVariable long clientId,@PathVariable long companyId,@RequestBody CompanyDTO companyDTO,
+                                           @RequestParam(required = false) Integer pageNumber,
+                                           @RequestParam(required = false) Integer countOfData,
+                                           HttpServletRequest httpServletRequest){
+        System.out.println(companyDTO.getCompanyName()+"   oaopasio;sdifjbsduipfbD");
+        List<CompanyDTO> companyDTOList = companyService.updateCompany(clientId,companyId,companyDTO);
+        logger.info("Get Deleted Companies");
+        if (pageNumber!=null&&countOfData!=null){
+            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            return new ResponseEntity<>(pagination, HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
+    }
+
+    @GetMapping("/getCategories")
+    public ResponseEntity<List<String>> allCategories(){
+//        new ResponseEntity<>(companyDTOList,HttpStatus.OK)
+        List<String> categories = Stream.of(Category.values())
+                .map(Category::name)
+                .collect(Collectors.toList());
+        System.out.println(categories);
+        return new ResponseEntity<>(categories, HttpStatus.OK);
+    }
+
+
 
 }

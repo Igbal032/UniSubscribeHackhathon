@@ -1,15 +1,14 @@
 package code.hackathon.unisubscribe.models;
 
 import code.hackathon.unisubscribe.enums.Category;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Builder(toBuilder = true)
 @AllArgsConstructor
@@ -28,6 +27,7 @@ public class Company {
     private String link;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private Client client;
     @Column(name = "expired_date")
     private LocalDate expiredDate;

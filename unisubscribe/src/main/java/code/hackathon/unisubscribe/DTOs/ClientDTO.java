@@ -16,7 +16,6 @@ public class ClientDTO {
     private String name;
     private String surname;
     private String email;
-//    private List<CompanyDTO> companies;
     private String phoneNumber;
     private LocalDate createdDate;
 }
