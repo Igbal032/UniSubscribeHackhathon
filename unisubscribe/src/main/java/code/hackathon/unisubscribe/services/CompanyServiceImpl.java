@@ -11,6 +11,10 @@ import code.hackathon.unisubscribe.models.Company;
 import code.hackathon.unisubscribe.repositories.CompanyRepository;
 import code.hackathon.unisubscribe.utils.Pagination;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -26,6 +30,8 @@ public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyDAO companyDAO;
     private final ClientDAO clientDAO;
+    private final JavaMailSender javaMailSender;
+
     private final CompanyRepository companyRepository;
     @Override
     public List<CompanyDTO> allCompanies(long clientId) {
@@ -162,7 +168,22 @@ public class CompanyServiceImpl implements CompanyService {
         return pagination;
     }
 
+    @Override
+    public  void sendEmail(String to, String subject,String content) {
 
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(to);
 
+        msg.setSubject(subject);
+        msg.setText(content);
+
+        javaMailSender.send(msg);
+
+    }
+
+    @Scheduled(fixedRate = 1000)
+    public void getMessage(){
+        System.out.println("Hello");
+    }
 
 }

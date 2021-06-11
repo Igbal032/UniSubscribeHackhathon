@@ -8,16 +8,22 @@ import code.hackathon.unisubscribe.models.Client;
 import code.hackathon.unisubscribe.services.ClientService;
 import code.hackathon.unisubscribe.services.CompanyService;
 import code.hackathon.unisubscribe.services.CompanyServiceImpl;
+import code.hackathon.unisubscribe.utils.MailExtension;
 import code.hackathon.unisubscribe.utils.Pagination;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -30,6 +36,7 @@ public class ClientController {
 
     private final ClientService clientService;
     private final CompanyService companyService;
+    private final JavaMailSender javaMailSender;
 
     Logger logger = LoggerFactory.getLogger(ClientController.class);
 
@@ -163,6 +170,15 @@ public class ClientController {
             return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
 
     }
+
+    @PostMapping("/sendMail")
+    public ResponseEntity<String> sendEmailToClients(@RequestParam String email,@RequestParam String subject,@RequestParam String content) throws IOException, MessagingException {
+
+        companyService.sendEmail(email,subject,content);
+        System.out.println("Success");
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 
 
 

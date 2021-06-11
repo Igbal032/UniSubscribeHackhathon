@@ -25,4 +25,6 @@ public interface CompanyService {
 
     <T> Pagination<?> pagination(List<T> students, int pageNumber, int countPerPage, StringBuffer url);
 
-}
+    void sendEmail(String to, String subject,String content);
+
+    }
