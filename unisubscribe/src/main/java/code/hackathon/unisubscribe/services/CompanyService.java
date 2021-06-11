@@ -1,5 +1,6 @@
 package code.hackathon.unisubscribe.services;
 
+import code.hackathon.unisubscribe.DTOs.ClientDTO;
 import code.hackathon.unisubscribe.DTOs.CompanyDTO;
 import code.hackathon.unisubscribe.models.Company;
 
@@ -9,11 +10,13 @@ public interface CompanyService {
 
     List<CompanyDTO> allCompanies(long clientId);
 
-    CompanyDTO addCompany(long clientId,CompanyDTO companyDTO);
+    List<CompanyDTO> deletedCompanies(long clientId);
 
-    Company deleteCompany(long id);
+    List<CompanyDTO> addCompany(long clientId,CompanyDTO companyDTO);
 
-    CompanyDTO updateCompany(CompanyDTO company);
+    List<CompanyDTO> deleteCompany(long clientId, long companyId);
+
+    List<CompanyDTO> updateCompany(long clientId,CompanyDTO company);
 
     CompanyDTO getCompany(long clientId,long companyId);
 }

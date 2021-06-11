@@ -24,4 +24,10 @@ public class ClientServiceImpl implements ClientService{
                 .build();
         return clientDTO;
     }
+
+    @Override
+    public Client add(Client newClient) {
+        Client client = clientDAO.add(newClient);
+        return client;
+    }
 }

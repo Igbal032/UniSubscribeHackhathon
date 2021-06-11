@@ -18,4 +18,5 @@ public class ClientDTO {
     private String email;
 //    private List<CompanyDTO> companies;
     private String phoneNumber;
+    private LocalDate createdDate;
 }

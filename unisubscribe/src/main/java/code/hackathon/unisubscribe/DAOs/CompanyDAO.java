@@ -8,9 +8,9 @@ public interface CompanyDAO {
 
     List<Company> allCompanies(long clientId);
 
-    Company addCompany(Company company);
+    Company addCompany(long clientId, Company company);
 
-    Company deleteCompany(int id);
+    Company deleteCompany(long clientId,long companyId);
 
     Company updateCompany(Company company);
 

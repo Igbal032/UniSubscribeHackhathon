@@ -25,6 +25,7 @@ public class Company {
     private double price;
     private String detail;
     private Category category;
+    private String link;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private Client client;
