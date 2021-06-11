@@ -8,6 +8,8 @@ public interface CompanyDAO {
 
     List<Company> allCompanies(long clientId);
 
+    List<Company> getAllCompanies();
+
     Company addCompany(long clientId, Company company);
 
     Company deleteCompany(long clientId,long companyId);

@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -102,6 +103,24 @@ public class CompanyServiceImpl implements CompanyService {
         return companyDTOList;
     }
 
+    @Scheduled(fixedRate = 5000)
+    public List<Company> checkCompany() {
+        List<Company> companies = companyDAO.getAllCompanies();
+        for (Company company : companies){
+            LocalDate today = LocalDate.now();
+            int difference = differenceOfDate(company.getExpiredDate(),today);
+            if (difference< company.getNotifyDate()){
+                company.setNotified(true);
+                sendEmail("iqbal.hoff@list.ru","Mesaj","Maas");
+            }
+            else {
+                company.setNotified(false);
+            }
+            companyRepository.save(company);
+        }
+        return companies;
+    }
+
     @Override
     public CompanyDTO getCompany(long clientId,long companyId) {
         Company company = companyDAO.getCompany(clientId,companyId);
@@ -180,10 +199,14 @@ public class CompanyServiceImpl implements CompanyService {
         javaMailSender.send(msg);
 
     }
-
-    @Scheduled(fixedRate = 1000)
-    public void getMessage(){
-        System.out.println("Hello");
+    public void ss(){
+        System.out.println("sadsadsad" +
+                "");
     }
 
+    public int differenceOfDate(LocalDate today, LocalDate expiredDate){
+        Period period = Period.between(today, expiredDate);
+        System.out.println(period);
+        return period.getDays();
+    }
 }

@@ -14,4 +14,7 @@ public interface CompanyRepository  extends CrudRepository<Company, Long> {
     @Query(value = "select * from companies c where c.user_id = ?1 ", nativeQuery = true)
     List<Company> getCompanies(long clientId);
 
+    @Query(value = "select c from Company c where c.deletedDate is null")
+    List<Company> getAllCompanies();
+
 }
