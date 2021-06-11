@@ -41,6 +41,7 @@ public class CompanyDAOImpl implements CompanyDAO{
         System.out.println(clientId+ " clientId");
         Client client = clientRepository.getClientById(clientId);
         company.setClient(client);
+        company.setNotified(false);
         companyRepository.save(company);
         return company;
     }
@@ -68,7 +69,7 @@ public class CompanyDAOImpl implements CompanyDAO{
         comp.setLink(company.getLink());
         comp.setClient(company.getClient());
         comp.setExpiredDate(company.getExpiredDate());
-        comp.setTime(company.isTime());
+        comp.setNotified(company.isNotified());
         comp.setNotifyDate(company.getNotifyDate());
         comp.setNotificationDate(company.getNotificationDate());
         companyRepository.save(comp);

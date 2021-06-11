@@ -8,6 +8,7 @@ import code.hackathon.unisubscribe.enums.Category;
 import code.hackathon.unisubscribe.exceptions.ClientNotFound;
 import code.hackathon.unisubscribe.models.Client;
 import code.hackathon.unisubscribe.models.Company;
+import code.hackathon.unisubscribe.repositories.CompanyRepository;
 import code.hackathon.unisubscribe.utils.Pagination;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,28 +25,38 @@ public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyDAO companyDAO;
     private final ClientDAO clientDAO;
-
+    private final CompanyRepository companyRepository;
     @Override
     public List<CompanyDTO> allCompanies(long clientId) {
         List<Company> companies = companyDAO.allCompanies(clientId)
                 .stream().filter(company -> company.getDeletedDate()==null).collect(Collectors.toList());
         companyDAO.allCompanies(clientId)
                 .stream().filter(company -> company.getDeletedDate()==null).forEach(cm->{
-
-                    Duration difference = Duration.between(cm.getExpiredDate(),cm.getNotificationDate());
-
+                LocalDate today = LocalDate.now();
+                LocalDate addDay = today.plus(Period.ofDays(cm.getNotifyDate()));
+            System.out.println(cm.getId()+" ex ");
+            System.out.println(cm.getExpiredDate()+" ex ");
+            System.out.println(addDay+" plus day");
+            System.out.println(addDay.isAfter(cm.getExpiredDate()));
+                if (addDay.isAfter(cm.getExpiredDate())){
+                    cm.setNotified(true);
+                }
+                else{
+                    cm.setNotified(false);
+                }
+                companyRepository.save(cm);
         });
-
-        List<CompanyDTO> companyDTOList = companies.stream().map(company -> {
-            return  CompanyDTO.builder()
-                    .id(company.getId())
-                    .companyName(company.getCompanyName())
-                    .price(company.getPrice())
-                    .detail(company.getDetail())
-                    .isTime(company.isTime())
-                    .notifyDate(company.getNotifyDate())
-                    .category(company.getCategory().toString()).build();
-        }).collect(Collectors.toList());
+        List<CompanyDTO> companyDTOList = convertModelsToDTOs(companies);
+//                companies.stream().map(company -> {
+//            return  CompanyDTO.builder()
+//                    .id(company.getId())
+//                    .companyName(company.getCompanyName())
+//                    .price(company.getPrice())
+//                    .detail(company.getDetail())
+//                    .isTime(company.isTime())
+//                    .notifyDate(company.getNotifyDate())
+//                    .category(company.getCategory().toString()).build();
+//        }).collect(Collectors.toList());
         return companyDTOList;
     }
 
@@ -61,6 +72,7 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public List<CompanyDTO> addCompany(long clientId, CompanyDTO companyDTO) {
         Client client = clientDAO.getClient(clientId);
+        companyDTO.setNotified(false);
         Company company = convertDtoToModel(client, companyDTO);
         companyDAO.addCompany(clientId,company);
         List<Company> companies = companyDAO.allCompanies(clientId)
@@ -113,7 +125,7 @@ public class CompanyServiceImpl implements CompanyService {
                     .companyName(company.getCompanyName())
                     .price(company.getPrice())
                     .detail(company.getDetail())
-                    .isTime(company.isTime())
+                    .notified(company.isNotified())
                     .expiredDate(company.getExpiredDate())
                     .notifyDate(company.getNotifyDate())
                     .category(company.getCategory().toString()).build();
@@ -134,7 +146,7 @@ public class CompanyServiceImpl implements CompanyService {
                 .notificationDate(notifyLocalDate)
                 .link(companyDTO.getLink())
                 .client(client)
-                .isTime(companyDTO.isTime())
+                .notified(companyDTO.isNotified())
                 .expiredDate(companyDTO.getExpiredDate())
                 .category(category)
                 .createdDate(LocalDate.now())
@@ -148,7 +160,7 @@ public class CompanyServiceImpl implements CompanyService {
                 .companyName(company.getCompanyName())
                 .category(company.getCategory().toString())
                 .price(company.getPrice())
-                .isTime(company.isTime())
+                .notified(company.isNotified())
                 .notifyDate(company.getNotifyDate())
                 .link(company.getLink())
                 .detail(company.getDetail())

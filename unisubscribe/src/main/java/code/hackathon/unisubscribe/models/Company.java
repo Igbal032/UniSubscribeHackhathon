@@ -32,7 +32,7 @@ public class Company {
     @Column(name = "expired_date")
     private LocalDate expiredDate;
     @Column(name = "is_time")
-    private boolean isTime;
+    private boolean notified;
     @Column(name = "notify_date")
     private int notifyDate;
     @Column(name = "notification_date")
