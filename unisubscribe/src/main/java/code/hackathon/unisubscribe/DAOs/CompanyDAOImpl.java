@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +33,26 @@ public class CompanyDAOImpl implements CompanyDAO{
         System.out.println(client.getName()+" Name");
         if (client==null)
             throw new CompanyNotFound("NOt Found");
-        return client.getCompanies();
+        List<Company> companyList = client.getCompanies();
+        for (Company company : companyList){
+            LocalDate today = LocalDate.now();
+            LocalDate addDay = today.plus(Period.ofDays(company.getNotifyDate()));
+            int dif = differenceOfDate(company.getExpiredDate(),today);
+            boolean good =  dif< company.getNotifyDate();
+            if (good){
+                System.out.println(company.getId()+" ex ");
+                System.out.println(company.getExpiredDate()+" exp ");
+                System.out.println(addDay+" plus day greater than exp");
+                System.out.println(dif+" - difference;  " + good);
+                System.out.println(company.getNotifyDate()+" - differenceinDatabase;  ");
+                company.setNotified(true);
+            }
+            else {
+                company.setNotified(false);
+            }
+            companyRepository.save(company);
+        }
+        return companyList;
     }
 
     @Override
@@ -84,5 +104,11 @@ public class CompanyDAOImpl implements CompanyDAO{
             throw new CompanyNotFound("Company not found");
         }
         return companies.get();
+    }
+
+    public int differenceOfDate(LocalDate today, LocalDate expiredDate){
+
+        Period period = Period.between(today, expiredDate);
+        return period.getDays();
     }
 }

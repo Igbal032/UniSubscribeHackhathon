@@ -30,33 +30,7 @@ public class CompanyServiceImpl implements CompanyService {
     public List<CompanyDTO> allCompanies(long clientId) {
         List<Company> companies = companyDAO.allCompanies(clientId)
                 .stream().filter(company -> company.getDeletedDate()==null).collect(Collectors.toList());
-        companyDAO.allCompanies(clientId)
-                .stream().filter(company -> company.getDeletedDate()==null).forEach(cm->{
-                LocalDate today = LocalDate.now();
-                LocalDate addDay = today.plus(Period.ofDays(cm.getNotifyDate()));
-            System.out.println(cm.getId()+" ex ");
-            System.out.println(cm.getExpiredDate()+" ex ");
-            System.out.println(addDay+" plus day");
-            System.out.println(addDay.isAfter(cm.getExpiredDate()));
-                if (addDay.isAfter(cm.getExpiredDate())){
-                    cm.setNotified(true);
-                }
-                else{
-                    cm.setNotified(false);
-                }
-                companyRepository.save(cm);
-        });
         List<CompanyDTO> companyDTOList = convertModelsToDTOs(companies);
-//                companies.stream().map(company -> {
-//            return  CompanyDTO.builder()
-//                    .id(company.getId())
-//                    .companyName(company.getCompanyName())
-//                    .price(company.getPrice())
-//                    .detail(company.getDetail())
-//                    .isTime(company.isTime())
-//                    .notifyDate(company.getNotifyDate())
-//                    .category(company.getCategory().toString()).build();
-//        }).collect(Collectors.toList());
         return companyDTOList;
     }
 
@@ -125,6 +99,7 @@ public class CompanyServiceImpl implements CompanyService {
                     .companyName(company.getCompanyName())
                     .price(company.getPrice())
                     .detail(company.getDetail())
+                    .link(company.getLink())
                     .notified(company.isNotified())
                     .expiredDate(company.getExpiredDate())
                     .notifyDate(company.getNotifyDate())
@@ -135,7 +110,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     public Company convertDtoToModel(Client client,CompanyDTO companyDTO){
         System.out.println(client+" client");
-        System.out.println(companyDTO+" companyDTO" );
+        System.out.println(companyDTO.getLink()+" companyDTO" );
         LocalDate notifyLocalDate = companyDTO.getExpiredDate().minus(Period.ofDays(companyDTO.getNotifyDate()));
         Category category = Category.valueOf(companyDTO.getCategory());
         Company company = Company.builder()
@@ -174,6 +149,8 @@ public class CompanyServiceImpl implements CompanyService {
         Pagination pagination = new Pagination(data, itemCountPerPage, pageNumber, url);
         return pagination;
     }
+
+
 
 
 }
