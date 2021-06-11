@@ -149,6 +149,22 @@ public class ClientController {
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
+    @GetMapping("/getCompanyByCategory/{category}/{clientId}")
+    public ResponseEntity<?> getCompanyByCategory(@PathVariable long clientId,@PathVariable String category,
+                                                             @RequestParam(required = false) Integer pageNumber,
+                                                             @RequestParam(required = false) Integer countOfData,
+                                                             HttpServletRequest httpServletRequest){
+        List<CompanyDTO> companyDTOList = companyService.getCompanyByCategory(clientId,category);
+        if (pageNumber!=null&&countOfData!=null){
+            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            return new ResponseEntity<>(pagination, HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
+
+    }
+
+
 
 
 }

@@ -19,6 +19,8 @@ public interface CompanyService {
 
     List<CompanyDTO> updateCompany(long clientId,long companyId,CompanyDTO company);
 
+    List<CompanyDTO> getCompanyByCategory(long clientId, String category);
+
     CompanyDTO getCompany(long clientId,long companyId);
 
     <T> Pagination<?> pagination(List<T> students, int pageNumber, int countPerPage, StringBuffer url);

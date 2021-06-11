@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -81,6 +82,17 @@ public class CompanyServiceImpl implements CompanyService {
                 .filter(c->c.getDeletedDate()==null)
                 .collect(Collectors.toList());
         List<CompanyDTO> companyDTOList = convertModelsToDTOs(companies);
+        return companyDTOList;
+    }
+
+    @Override
+    public List<CompanyDTO> getCompanyByCategory(long clientId, String category) {
+
+        Category category1 = Category.valueOf(category.toUpperCase());
+        List<Company> companyLiST = companyDAO.allCompanies(clientId)
+                .stream().filter(w->w.getDeletedDate()==null&&w.getCategory().equals(category1))
+                .collect(Collectors.toList());
+        List<CompanyDTO> companyDTOList = convertModelsToDTOs(companyLiST);
         return companyDTOList;
     }
 
