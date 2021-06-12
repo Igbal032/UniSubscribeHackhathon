@@ -1,5 +1,5 @@
 package code.hackathon.unisubscribe.services;
-
+import java.time.temporal.ChronoUnit;
 import code.hackathon.unisubscribe.DAOs.ClientDAO;
 import code.hackathon.unisubscribe.DAOs.SubscriptionDAO;
 import code.hackathon.unisubscribe.DTOs.SubscriptionDTO;
@@ -106,12 +106,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subscriptionDTOList;
     }
 
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 5000)
     public List<Subscription> checkSubscriptions() {
         List<Subscription> subscriptions = subscriptionDAO.getAllSubscriptions();
-        for (Subscription subscription : subscriptions){
+        for (Subscription subscription : subscriptions.stream().filter(w->w.getDeletedDate()==null).collect(Collectors.toList())){
             LocalDate today = LocalDate.now();
-            int difference = differenceOfDate(subscription.getExpiredDate(),today);
+            long difference  = differenceOfDate(today,subscription.getExpiredDate());
             if (difference < subscription.getNotifyDate() && subscription.isNotified()==false){
                 subscription.setNotified(true);
                 sendEmail(subscription.getClient().getEmail(),
@@ -198,9 +198,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     }
 
-    public int differenceOfDate(LocalDate today, LocalDate expiredDate){
-        Period period = Period.between(today, expiredDate);
-        System.out.println(period);
-        return period.getDays();
+    public long differenceOfDate(LocalDate today, LocalDate expiredDate){
+        long daysBetween = ChronoUnit.DAYS.between(today, expiredDate);
+        return daysBetween;
     }
 }

@@ -6,6 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import code.hackathon.unisubscribe.exceptions.ClientNotFound;
+import code.hackathon.unisubscribe.models.Client;
+import code.hackathon.unisubscribe.repositories.ClientRepository;
+import code.hackathon.unisubscribe.repositories.SubscriptionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -23,9 +28,24 @@ public class JwtTokenUtil implements Serializable {
     @Value("${jwt.secret}")
     private String secret;
 
+    @Autowired
+    ClientRepository clientRepository;
+
+
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
+    }
+
+    public long getUserId(String token){
+        String username = getUsernameFromToken(token);
+        Client findClient = clientRepository.getClientByEmail(username);
+        if (findClient==null){
+            throw new ClientNotFound("Not found");
+        }
+        else {
+            return findClient.getId();
+        }
     }
 
     //retrieve expiration date from jwt token

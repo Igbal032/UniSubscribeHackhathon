@@ -3,6 +3,7 @@ package code.hackathon.unisubscribe.controllers;
 
 import code.hackathon.unisubscribe.DTOs.ClientDTO;
 import code.hackathon.unisubscribe.DTOs.SubscriptionDTO;
+import code.hackathon.unisubscribe.config.JwtTokenUtil;
 import code.hackathon.unisubscribe.enums.Category;
 import code.hackathon.unisubscribe.models.Client;
 import code.hackathon.unisubscribe.services.ClientService;
@@ -32,7 +33,7 @@ public class ClientController {
 
     private final ClientService clientService;
     private final SubscriptionService subscriptionService;
-    private final JavaMailSender javaMailSender;
+    private final JwtTokenUtil jwtTokenUtil;
 
     Logger logger = LoggerFactory.getLogger(ClientController.class);
 
@@ -40,22 +41,22 @@ public class ClientController {
     get user with id
      */
 
-    @GetMapping("/{clientId}")
-    public ResponseEntity<ClientDTO> getClient(@PathVariable long clientId){
-        logger.info("Get Client 11");
-        ClientDTO clientDTO = clientService.getClient(clientId);
-        logger.info("Get Client");
+    @GetMapping("/")
+    public ResponseEntity<ClientDTO> getClient( HttpServletRequest httpServletRequest){
+        logger.info("Get Client ");
+        long userId = jwtTokenUtil.getUserId(httpServletRequest.getHeader("Authorization"));
+        ClientDTO clientDTO = clientService.getClient(userId);
         return new ResponseEntity<>(clientDTO,HttpStatus.OK);
     }
     /*
     get all subscription with user id
      */
-    @GetMapping("/{clientId}/subscriptions")
-    public ResponseEntity<?> getSubscriptions(@PathVariable long clientId, @RequestParam(required = false) Integer pageNumber,
+    @GetMapping("/subscriptions")
+    public ResponseEntity<?> getSubscriptions(@RequestParam(required = false) Integer pageNumber,
                                               @RequestParam(required = false) Integer countOfData,
                                               HttpServletRequest httpServletRequest){
-
-        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.allSubscriptions(clientId);
+        long userId = jwtTokenUtil.getUserId(httpServletRequest.getHeader("Authorization"));
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.allSubscriptions(userId);
         if (pageNumber!=null&&countOfData!=null){
             Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
@@ -68,13 +69,15 @@ public class ClientController {
     /*
     create subscription
      */
-    @PostMapping("/{clientId}/subscription")
-    public ResponseEntity<?> createSubscription(@PathVariable long clientId, @RequestBody SubscriptionDTO subscriptionDTO,
+    @PostMapping("/subscription")
+    public ResponseEntity<?> createSubscription(HttpServletRequest request, @RequestBody SubscriptionDTO subscriptionDTO,
                                                 @RequestParam(required = false) Integer pageNumber,
                                                 @RequestParam(required = false) Integer countOfData,
                                                 HttpServletRequest httpServletRequest){
-        subscriptionService.addSubscription(clientId, subscriptionDTO);
-        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.allSubscriptions(clientId);
+        long userId = jwtTokenUtil.getUserId(request.getHeader("Authorization"));
+        System.out.println("User  id " + userId+"---------------------");
+        subscriptionService.addSubscription(userId, subscriptionDTO);
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.allSubscriptions(userId);
         logger.info("Create Subscription");
         if (pageNumber!=null&&countOfData!=null){
             Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
@@ -86,19 +89,22 @@ public class ClientController {
     /*
     get subscription
      */
-    @GetMapping("/{clientId}/subscriptions/{subscriptionId}")
-    public ResponseEntity<SubscriptionDTO> getSubscription(@PathVariable long clientId, @PathVariable long subscriptionId){
-        SubscriptionDTO newSubscriptionDTO = subscriptionService.getSubscription(clientId, subscriptionId);
+    @GetMapping("/subscriptions/{subscriptionId}")
+    public ResponseEntity<SubscriptionDTO> getSubscription(@PathVariable long subscriptionId,
+                                                           HttpServletRequest httpServletRequest){
+        long userId = jwtTokenUtil.getUserId(httpServletRequest.getHeader("Authorization"));
+        SubscriptionDTO newSubscriptionDTO = subscriptionService.getSubscription(userId, subscriptionId);
         logger.info("Get Subscription");
         return new ResponseEntity<>(newSubscriptionDTO,HttpStatus.OK);
     }
 
-    @DeleteMapping("{clientId}/subscriptions/delete/{subscriptionId}")
-    public ResponseEntity<?> deleteSubscription(@PathVariable long clientId, @PathVariable long subscriptionId,
+    @DeleteMapping("subscriptions/delete/{subscriptionId}")
+    public ResponseEntity<?> deleteSubscription(@PathVariable long subscriptionId,
                                                 @RequestParam(required = false) Integer pageNumber,
                                                 @RequestParam(required = false) Integer countOfData,
                                                 HttpServletRequest httpServletRequest){
-        List<SubscriptionDTO> subscriptionDTOList =  subscriptionService.deleteSubscription(clientId, subscriptionId);
+        long userId = jwtTokenUtil.getUserId(httpServletRequest.getHeader("Authorization"));
+        List<SubscriptionDTO> subscriptionDTOList =  subscriptionService.deleteSubscription(userId, subscriptionId);
         if (pageNumber!=null&&countOfData!=null){
             Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
@@ -106,12 +112,13 @@ public class ClientController {
         else
             return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
-    @GetMapping("/{clientId}/subscriptions/deletedSubscriptions")
-    public ResponseEntity<?> getDeletedSubscriptions(@PathVariable long clientId,
+    @GetMapping("/subscriptions/deletedSubscriptions")
+    public ResponseEntity<?> getDeletedSubscriptions(
                                                      @RequestParam(required = false) Integer pageNumber,
                                                      @RequestParam(required = false) Integer countOfData,
                                                      HttpServletRequest httpServletRequest){
-        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.deletedSubscription(clientId);
+        long userId = jwtTokenUtil.getUserId(httpServletRequest.getHeader("Authorization"));
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.deletedSubscription(userId);
         if (pageNumber!=null&&countOfData!=null){
             Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
@@ -120,12 +127,13 @@ public class ClientController {
             return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
 
-    @GetMapping("/{clientId}/subscriptions/undelete/{subscriptionId}")
-    public ResponseEntity<?> unDeleteSubscriptions(@PathVariable long clientId,@PathVariable long  subscriptionId,
+    @GetMapping("/subscriptions/undelete/{subscriptionId}")
+    public ResponseEntity<?> unDeleteSubscriptions(@PathVariable long  subscriptionId,
                                                      @RequestParam(required = false) Integer pageNumber,
                                                      @RequestParam(required = false) Integer countOfData,
                                                      HttpServletRequest httpServletRequest){
-        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.undeleteSubscription(clientId,subscriptionId);
+        long userId = jwtTokenUtil.getUserId(httpServletRequest.getHeader("Authorization"));
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.undeleteSubscription(userId,subscriptionId);
         if (pageNumber!=null&&countOfData!=null){
             Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
@@ -134,12 +142,13 @@ public class ClientController {
             return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
 
-    @PutMapping("/{clientId}/subscriptions/update/{subscriptionId}")
-    public ResponseEntity<?> updateSubscription(@PathVariable long clientId, @PathVariable long subscriptionId, @RequestBody SubscriptionDTO subscriptionDTO,
+    @PutMapping("/subscriptions/update/{subscriptionId}")
+    public ResponseEntity<?> updateSubscription(@PathVariable long subscriptionId, @RequestBody SubscriptionDTO subscriptionDTO,
                                                 @RequestParam(required = false) Integer pageNumber,
                                                 @RequestParam(required = false) Integer countOfData,
                                                 HttpServletRequest httpServletRequest){
-        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.updateSubscription(clientId, subscriptionId, subscriptionDTO);
+        long userId = jwtTokenUtil.getUserId(httpServletRequest.getHeader("Authorization"));
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.updateSubscription(userId, subscriptionId, subscriptionDTO);
         logger.info("Get Deleted subscription");
         if (pageNumber!=null&&countOfData!=null){
             Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
@@ -149,12 +158,13 @@ public class ClientController {
             return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
 
-    @GetMapping("/getSubscriptionByCategory/{category}/{clientId}")
-    public ResponseEntity<?> getSubscriptionByCategory(@PathVariable long clientId, @PathVariable String category,
+    @GetMapping("/getSubscriptionByCategory/{category}")
+    public ResponseEntity<?> getSubscriptionByCategory(@PathVariable String category,
                                                         @RequestParam(required = false) Integer pageNumber,
                                                         @RequestParam(required = false) Integer countOfData,
                                                         HttpServletRequest httpServletRequest){
-        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.getSubscriptionByCategory(clientId,category);
+        long userId = jwtTokenUtil.getUserId(httpServletRequest.getHeader("Authorization"));
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.getSubscriptionByCategory(userId,category);
         if (pageNumber!=null&&countOfData!=null){
             Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
@@ -168,7 +178,6 @@ public class ClientController {
     public ResponseEntity<String> sendEmailToClients(@RequestParam String email,
                                                      @RequestParam String subject,
                                                      @RequestParam String content){
-
         subscriptionService.sendEmail(email,subject,content);
         return new ResponseEntity<>(HttpStatus.OK);
     }
