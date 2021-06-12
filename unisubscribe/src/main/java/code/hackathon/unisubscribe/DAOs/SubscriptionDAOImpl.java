@@ -47,6 +47,7 @@ public class SubscriptionDAOImpl implements SubscriptionDAO {
     public Subscription addSubscription(long clientId, Subscription subscription) {
         Client client = clientRepository.getClientById(clientId);
         subscription.setClient(client);
+        System.out.println(client.getName() + " Hello Create  in DAO- ");
         subscription.setNotified(false);
         subscriptionRepository.save(subscription);
         return subscription;

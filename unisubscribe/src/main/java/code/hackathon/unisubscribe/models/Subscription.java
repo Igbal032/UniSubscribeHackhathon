@@ -25,7 +25,7 @@ public class Subscription {
     private String detail;
     private Category category;
     private String link;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
     private Client client;

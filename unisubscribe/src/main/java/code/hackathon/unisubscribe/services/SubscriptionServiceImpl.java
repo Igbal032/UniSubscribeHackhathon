@@ -97,18 +97,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subscriptionDTOList;
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 300000)
     public List<Subscription> checkSubscriptions() {
         List<Subscription> subscriptions = subscriptionDAO.getAllSubscriptions();
         for (Subscription subscription : subscriptions){
             LocalDate today = LocalDate.now();
             int difference = differenceOfDate(subscription.getExpiredDate(),today);
-            if (difference< subscription.getNotifyDate()){
+            if (difference < subscription.getNotifyDate() && subscription.isNotified()==false){
                 subscription.setNotified(true);
-                sendEmail("iqbal.hoff@list.ru","Mesaj","Maas");
-            }
-            else {
-                subscription.setNotified(false);
+                sendEmail(subscription.getClient().getEmail(),
+                        "Expired Date will be reached",
+                        "Subscription name: "+subscription.getSubscriptionName()+"\n"+"Expired Date: "+subscription.getExpiredDate());
             }
             subscriptionRepository.save(subscription);
         }
@@ -140,14 +139,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     public Subscription convertDtoToModel(Client client, SubscriptionDTO subscriptionDTO){
-        LocalDate notifyLocalDate = subscriptionDTO.getExpiredDate().minus(Period.ofDays(subscriptionDTO.getNotifyDate()));
+
+//        LocalDate notifyLocalDate = subscriptionDTO.getExpiredDate().minus(Period.ofDays(subscriptionDTO.getNotifyDate()));
         Category category = Category.valueOf(subscriptionDTO.getCategory());
         Subscription subscription = Subscription.builder()
                 .subscriptionName(subscriptionDTO.getSubscriptionName())
                 .price(subscriptionDTO.getPrice())
                 .detail(subscriptionDTO.getDetail())
                 .notifyDate(subscriptionDTO.getNotifyDate())
-                .notificationDate(notifyLocalDate)
+//                .notificationDate(notifyLocalDate)
                 .link(subscriptionDTO.getLink())
                 .client(client)
                 .notified(subscriptionDTO.isNotified())
@@ -180,20 +180,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public  void sendEmail(String to, String subject,String content) {
-
+    public void sendEmail(String to, String subject,String content) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(to);
-
         msg.setSubject(subject);
         msg.setText(content);
-
         javaMailSender.send(msg);
 
-    }
-    public void ss(){
-        System.out.println("sadsadsad" +
-                "");
     }
 
     public int differenceOfDate(LocalDate today, LocalDate expiredDate){
