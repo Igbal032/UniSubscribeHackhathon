@@ -15,6 +15,8 @@ public interface SubscriptionService {
 
     List<SubscriptionDTO> deleteSubscription(long clientId, long subscriptionId);
 
+    List<SubscriptionDTO> undeleteSubscription(long clientId, long subscriptionId);
+
     List<SubscriptionDTO> updateSubscription(long clientId, long subscriptionId, SubscriptionDTO company);
 
     List<SubscriptionDTO> getSubscriptionByCategory(long clientId, String category);

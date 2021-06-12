@@ -120,6 +120,20 @@ public class ClientController {
             return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
 
+    @GetMapping("/{clientId}/subscriptions/undelete/{subscriptionId}")
+    public ResponseEntity<?> unDeleteSubscriptions(@PathVariable long clientId,@PathVariable long  subscriptionId,
+                                                     @RequestParam(required = false) Integer pageNumber,
+                                                     @RequestParam(required = false) Integer countOfData,
+                                                     HttpServletRequest httpServletRequest){
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.undeleteSubscription(clientId,subscriptionId);
+        if (pageNumber!=null&&countOfData!=null){
+            Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            return new ResponseEntity<>(pagination, HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
+    }
+
     @PutMapping("/{clientId}/subscriptions/update/{subscriptionId}")
     public ResponseEntity<?> updateSubscription(@PathVariable long clientId, @PathVariable long subscriptionId, @RequestBody SubscriptionDTO subscriptionDTO,
                                                 @RequestParam(required = false) Integer pageNumber,

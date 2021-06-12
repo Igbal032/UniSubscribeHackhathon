@@ -72,6 +72,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public List<SubscriptionDTO> undeleteSubscription(long clientId, long subscriptionId) {
+        subscriptionDAO.undeleteSubscription(clientId, subscriptionId);
+        List<Subscription> deletedSubscriptions = subscriptionDAO.allSubscriptions(clientId)
+                .stream().filter(subscription -> subscription.getDeletedDate()!=null).collect(Collectors.toList());
+        List<SubscriptionDTO> subscriptionDTOList = convertModelsToDTOs(deletedSubscriptions);
+        return subscriptionDTOList;
+    }
+
+    @Override
     public List<SubscriptionDTO> updateSubscription(long clientId, long subscriptionId, SubscriptionDTO subscriptionDTO) {
         Client client = clientDAO.getClient(clientId);
         if (client==null)

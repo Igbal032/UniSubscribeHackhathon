@@ -62,6 +62,15 @@ public class SubscriptionDAOImpl implements SubscriptionDAO {
         return findSubscription;
     }
 
+    @Override
+    public Subscription undeleteSubscription(long clientId, long companyId) {
+
+        Subscription findSubscription = subscriptionRepository.getSubscriptionById(companyId);
+        findSubscription.setDeletedDate(null);
+        subscriptionRepository.save(findSubscription);
+        return findSubscription;
+    }
+
     @Transactional
     @Override
     public Subscription updateSubscription(long companyId, Subscription subscription) {

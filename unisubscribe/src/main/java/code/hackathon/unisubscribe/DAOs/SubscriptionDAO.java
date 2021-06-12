@@ -14,6 +14,8 @@ public interface SubscriptionDAO {
 
     Subscription deleteSubscription(long clientId, long companyId);
 
+    Subscription undeleteSubscription(long clientId, long companyId);
+
     Subscription updateSubscription(long clientId, Subscription subscription);
 
     Subscription getSubscription(long clientId, long subscriptionId);
