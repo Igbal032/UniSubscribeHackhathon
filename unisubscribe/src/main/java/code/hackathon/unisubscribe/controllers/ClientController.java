@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Controller
-@CrossOrigin
 @RequestMapping("api/clients")
 @RequiredArgsConstructor
 public class ClientController {
@@ -55,6 +54,7 @@ public class ClientController {
     public ResponseEntity<?> getSubscriptions(@RequestParam(required = false) Integer pageNumber,
                                               @RequestParam(required = false) Integer countOfData,
                                               HttpServletRequest httpServletRequest){
+        System.out.println("Hader"+httpServletRequest.getHeader("Authorization"));
         long userId = jwtTokenUtil.getUserId(httpServletRequest.getHeader("Authorization"));
         List<SubscriptionDTO> subscriptionDTOList = subscriptionService.allSubscriptions(userId);
         if (pageNumber!=null&&countOfData!=null){
@@ -69,6 +69,7 @@ public class ClientController {
     /*
     create subscription
      */
+    @CrossOrigin
     @PostMapping("/subscription")
     public ResponseEntity<?> createSubscription(HttpServletRequest request, @RequestBody SubscriptionDTO subscriptionDTO,
                                                 @RequestParam(required = false) Integer pageNumber,
@@ -97,7 +98,6 @@ public class ClientController {
         logger.info("Get Subscription");
         return new ResponseEntity<>(newSubscriptionDTO,HttpStatus.OK);
     }
-
     @DeleteMapping("subscriptions/delete/{subscriptionId}")
     public ResponseEntity<?> deleteSubscription(@PathVariable long subscriptionId,
                                                 @RequestParam(required = false) Integer pageNumber,
@@ -141,7 +141,6 @@ public class ClientController {
         else
             return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
-
     @PutMapping("/subscriptions/update/{subscriptionId}")
     public ResponseEntity<?> updateSubscription(@PathVariable long subscriptionId, @RequestBody SubscriptionDTO subscriptionDTO,
                                                 @RequestParam(required = false) Integer pageNumber,
@@ -173,7 +172,6 @@ public class ClientController {
             return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
 
     }
-
     @PostMapping("/sendMail")
     public ResponseEntity<String> sendEmailToClients(@RequestParam String email,
                                                      @RequestParam String subject,
@@ -181,9 +179,4 @@ public class ClientController {
         subscriptionService.sendEmail(email,subject,content);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
-
-
-
-
 }
