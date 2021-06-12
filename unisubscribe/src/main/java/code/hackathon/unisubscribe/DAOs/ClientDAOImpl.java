@@ -23,7 +23,7 @@ public class ClientDAOImpl implements ClientDAO{
     }
 
     @Override
-    public Client add(Client newClient) {
+    public Client addUser(Client newClient) {
         clientRepository.save(newClient);
         return newClient;
     }

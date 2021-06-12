@@ -8,7 +8,7 @@ public interface ClientDAO {
 
     Client getClient(long id);
 
-    Client add(Client newClient);
+    Client addUser(Client newClient);
 
 
 }

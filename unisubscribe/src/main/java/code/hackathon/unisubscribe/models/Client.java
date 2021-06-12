@@ -23,6 +23,7 @@ public class Client {
     private String name;
     private String surname;
     private String email;
+    private String password;
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
     @JsonManagedReference

@@ -23,9 +23,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Controller
+@CrossOrigin
 @RequestMapping("api/clients")
 @RequiredArgsConstructor
 public class ClientController {
+
+
 
     private final ClientService clientService;
     private final SubscriptionService subscriptionService;
@@ -36,12 +39,6 @@ public class ClientController {
     /*
     get user with id
      */
-    @PostMapping("/setUser")
-    public ResponseEntity<Client> getClient(@RequestBody Client client){
-        logger.info("Get Client");
-        Client client1 = clientService.add(client);
-        return new ResponseEntity<>(client1,HttpStatus.OK);
-    }
 
     @GetMapping("/{clientId}")
     public ResponseEntity<ClientDTO> getClient(@PathVariable long clientId){

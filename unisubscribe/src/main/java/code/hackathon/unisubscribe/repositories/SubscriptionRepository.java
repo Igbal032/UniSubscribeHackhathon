@@ -1,5 +1,6 @@
 package code.hackathon.unisubscribe.repositories;
 
+import code.hackathon.unisubscribe.models.Client;
 import code.hackathon.unisubscribe.models.Subscription;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -12,5 +13,6 @@ public interface SubscriptionRepository extends CrudRepository<Subscription, Lon
 
     @Query(value = "select c from Subscription c where c.deletedDate is null")
     List<Subscription> getAllSubscriptions();
+
 
 }
