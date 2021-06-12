@@ -26,7 +26,7 @@ public class Client {
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<Company> companies;
+    private List<Subscription> subscription;
     @Column(name = "phone_number")
     private String phoneNumber;
     @Column(name = "created_date")

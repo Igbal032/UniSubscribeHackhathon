@@ -14,13 +14,13 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "companies")
-public class Company {
+public class Subscription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(name = "company_name")
-    private String companyName;
+    @Column(name = "subscription_name")
+    private String subscriptionName;
     private double price;
     private String detail;
     private Category category;

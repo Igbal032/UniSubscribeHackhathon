@@ -1,12 +1,9 @@
 package code.hackathon.unisubscribe.DTOs;
 
-import code.hackathon.unisubscribe.models.Company;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @Builder(toBuilder = true)

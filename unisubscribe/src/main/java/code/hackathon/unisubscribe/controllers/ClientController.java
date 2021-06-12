@@ -2,30 +2,23 @@ package code.hackathon.unisubscribe.controllers;
 
 
 import code.hackathon.unisubscribe.DTOs.ClientDTO;
-import code.hackathon.unisubscribe.DTOs.CompanyDTO;
+import code.hackathon.unisubscribe.DTOs.SubscriptionDTO;
 import code.hackathon.unisubscribe.enums.Category;
 import code.hackathon.unisubscribe.models.Client;
 import code.hackathon.unisubscribe.services.ClientService;
-import code.hackathon.unisubscribe.services.CompanyService;
-import code.hackathon.unisubscribe.services.CompanyServiceImpl;
-import code.hackathon.unisubscribe.utils.MailExtension;
+import code.hackathon.unisubscribe.services.SubscriptionService;
 import code.hackathon.unisubscribe.utils.Pagination;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,7 +28,7 @@ import java.util.stream.Stream;
 public class ClientController {
 
     private final ClientService clientService;
-    private final CompanyService companyService;
+    private final SubscriptionService subscriptionService;
     private final JavaMailSender javaMailSender;
 
     Logger logger = LoggerFactory.getLogger(ClientController.class);
@@ -58,124 +51,114 @@ public class ClientController {
         return new ResponseEntity<>(clientDTO,HttpStatus.OK);
     }
     /*
-    get all companies with user id
+    get all subscription with user id
      */
-    @GetMapping("/{clientId}/companies")
-    public ResponseEntity<?> getCompanies(@PathVariable long clientId, @RequestParam(required = false) Integer pageNumber,
-                                                         @RequestParam(required = false) Integer countOfData,
-                                                         HttpServletRequest httpServletRequest){
+    @GetMapping("/{clientId}/subscriptions")
+    public ResponseEntity<?> getSubscriptions(@PathVariable long clientId, @RequestParam(required = false) Integer pageNumber,
+                                              @RequestParam(required = false) Integer countOfData,
+                                              HttpServletRequest httpServletRequest){
 
-        List<CompanyDTO> companyDTOList = companyService.allCompanies(clientId);
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.allSubscriptions(clientId);
         if (pageNumber!=null&&countOfData!=null){
-            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
         }
         else
-            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
+            return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
 
 
     /*
-    create company
+    create subscription
      */
-    @PostMapping("/{clientId}/companies")
-    public ResponseEntity<?> createCompany(@PathVariable long clientId,@RequestBody CompanyDTO companyDTO,
-                                                          @RequestParam(required = false) Integer pageNumber,
-                                                          @RequestParam(required = false) Integer countOfData,
-                                                          HttpServletRequest httpServletRequest){
-        companyService.addCompany(clientId,companyDTO);
-        List<CompanyDTO> companyDTOList = companyService.allCompanies(clientId);
-        logger.info("Create Company");
+    @PostMapping("/{clientId}/subscription")
+    public ResponseEntity<?> createSubscription(@PathVariable long clientId, @RequestBody SubscriptionDTO subscriptionDTO,
+                                                @RequestParam(required = false) Integer pageNumber,
+                                                @RequestParam(required = false) Integer countOfData,
+                                                HttpServletRequest httpServletRequest){
+        subscriptionService.addSubscription(clientId, subscriptionDTO);
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.allSubscriptions(clientId);
+        logger.info("Create Subscription");
         if (pageNumber!=null&&countOfData!=null){
-            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
         }
         else
-            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
+            return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
     /*
-    get company
+    get subscription
      */
-    @GetMapping("/{clientId}/companies/{companyId}")
-    public ResponseEntity<CompanyDTO> getCompany(@PathVariable long clientId,@PathVariable long companyId){
-        CompanyDTO newCompanyDTO = companyService.getCompany(clientId,companyId);
-        logger.info("Get Company");
-        return new ResponseEntity<>(newCompanyDTO,HttpStatus.OK);
+    @GetMapping("/{clientId}/subscriptions/{subscriptionId}")
+    public ResponseEntity<SubscriptionDTO> getSubscription(@PathVariable long clientId, @PathVariable long subscriptionId){
+        SubscriptionDTO newSubscriptionDTO = subscriptionService.getSubscription(clientId, subscriptionId);
+        logger.info("Get Subscription");
+        return new ResponseEntity<>(newSubscriptionDTO,HttpStatus.OK);
     }
 
-    @DeleteMapping("{clientId}/companies/delete/{companyId}")
-    public ResponseEntity<?> deleteCompany(@PathVariable long clientId,@PathVariable long companyId,
-                                                          @RequestParam(required = false) Integer pageNumber,
-                                                          @RequestParam(required = false) Integer countOfData,
-                                                          HttpServletRequest httpServletRequest){
-        List<CompanyDTO> companyDTOList =  companyService.deleteCompany(clientId,companyId);
+    @DeleteMapping("{clientId}/subscriptions/delete/{subscriptionId}")
+    public ResponseEntity<?> deleteSubscription(@PathVariable long clientId, @PathVariable long subscriptionId,
+                                                @RequestParam(required = false) Integer pageNumber,
+                                                @RequestParam(required = false) Integer countOfData,
+                                                HttpServletRequest httpServletRequest){
+        List<SubscriptionDTO> subscriptionDTOList =  subscriptionService.deleteSubscription(clientId, subscriptionId);
         if (pageNumber!=null&&countOfData!=null){
-            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
         }
         else
-            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
+            return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
-    @GetMapping("/{clientId}/companies/deletedCompanies")
-    public ResponseEntity<?> getDeletedCompanies(@PathVariable long clientId,
-                                                 @RequestParam(required = false) Integer pageNumber,
-                                                 @RequestParam(required = false) Integer countOfData,
-                                                 HttpServletRequest httpServletRequest){
-        List<CompanyDTO> companyDTOList = companyService.deletedCompanies(clientId);
+    @GetMapping("/{clientId}/subscriptions/deletedSubscriptions")
+    public ResponseEntity<?> getDeletedSubscriptions(@PathVariable long clientId,
+                                                     @RequestParam(required = false) Integer pageNumber,
+                                                     @RequestParam(required = false) Integer countOfData,
+                                                     HttpServletRequest httpServletRequest){
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.deletedSubscription(clientId);
         if (pageNumber!=null&&countOfData!=null){
-            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
         }
         else
-            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
+            return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
 
-    @PutMapping("/{clientId}/companies/update/{companyId}")
-    public ResponseEntity<?> updateCompany(@PathVariable long clientId,@PathVariable long companyId,@RequestBody CompanyDTO companyDTO,
-                                           @RequestParam(required = false) Integer pageNumber,
-                                           @RequestParam(required = false) Integer countOfData,
-                                           HttpServletRequest httpServletRequest){
-        System.out.println(companyDTO.getCompanyName()+"   oaopasio;sdifjbsduipfbD");
-        List<CompanyDTO> companyDTOList = companyService.updateCompany(clientId,companyId,companyDTO);
-        logger.info("Get Deleted Companies");
+    @PutMapping("/{clientId}/subscriptions/update/{subscriptionId}")
+    public ResponseEntity<?> updateSubscription(@PathVariable long clientId, @PathVariable long subscriptionId, @RequestBody SubscriptionDTO subscriptionDTO,
+                                                @RequestParam(required = false) Integer pageNumber,
+                                                @RequestParam(required = false) Integer countOfData,
+                                                HttpServletRequest httpServletRequest){
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.updateSubscription(clientId, subscriptionId, subscriptionDTO);
+        logger.info("Get Deleted subscription");
         if (pageNumber!=null&&countOfData!=null){
-            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
         }
         else
-            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
+            return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
     }
 
-    @GetMapping("/getCategories")
-    public ResponseEntity<List<String>> allCategories(){
-//        new ResponseEntity<>(companyDTOList,HttpStatus.OK)
-        List<String> categories = Stream.of(Category.values())
-                .map(Category::name)
-                .collect(Collectors.toList());
-        System.out.println(categories);
-        return new ResponseEntity<>(categories, HttpStatus.OK);
-    }
-
-    @GetMapping("/getCompanyByCategory/{category}/{clientId}")
-    public ResponseEntity<?> getCompanyByCategory(@PathVariable long clientId,@PathVariable String category,
-                                                             @RequestParam(required = false) Integer pageNumber,
-                                                             @RequestParam(required = false) Integer countOfData,
-                                                             HttpServletRequest httpServletRequest){
-        List<CompanyDTO> companyDTOList = companyService.getCompanyByCategory(clientId,category);
+    @GetMapping("/getSubscriptionByCategory/{category}/{clientId}")
+    public ResponseEntity<?> getSubscriptionByCategory(@PathVariable long clientId, @PathVariable String category,
+                                                        @RequestParam(required = false) Integer pageNumber,
+                                                        @RequestParam(required = false) Integer countOfData,
+                                                        HttpServletRequest httpServletRequest){
+        List<SubscriptionDTO> subscriptionDTOList = subscriptionService.getSubscriptionByCategory(clientId,category);
         if (pageNumber!=null&&countOfData!=null){
-            Pagination<?> pagination = companyService.pagination(companyDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
+            Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
         }
         else
-            return new ResponseEntity<>(companyDTOList, HttpStatus.OK);
+            return new ResponseEntity<>(subscriptionDTOList, HttpStatus.OK);
 
     }
 
     @PostMapping("/sendMail")
-    public ResponseEntity<String> sendEmailToClients(@RequestParam String email,@RequestParam String subject,@RequestParam String content) throws IOException, MessagingException {
+    public ResponseEntity<String> sendEmailToClients(@RequestParam String email,
+                                                     @RequestParam String subject,
+                                                     @RequestParam String content){
 
-        companyService.sendEmail(email,subject,content);
-        System.out.println("Success");
+        subscriptionService.sendEmail(email,subject,content);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

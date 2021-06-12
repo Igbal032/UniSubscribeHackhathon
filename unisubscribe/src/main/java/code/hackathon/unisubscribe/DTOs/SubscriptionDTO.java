@@ -12,10 +12,10 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class CompanyDTO {
+public class SubscriptionDTO {
 
     private long id;
-    private String companyName;
+    private String subscriptionName;
     private double price;
     private String detail;
     private boolean notified;
