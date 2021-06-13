@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -27,8 +28,6 @@ import java.util.stream.Stream;
 @RequestMapping("api/clients")
 @RequiredArgsConstructor
 public class ClientController {
-
-
 
     private final ClientService clientService;
     private final SubscriptionService subscriptionService;
@@ -69,7 +68,6 @@ public class ClientController {
     /*
     create subscription
      */
-    @CrossOrigin
     @PostMapping("/subscription")
     public ResponseEntity<?> createSubscription(HttpServletRequest request, @RequestBody SubscriptionDTO subscriptionDTO,
                                                 @RequestParam(required = false) Integer pageNumber,
