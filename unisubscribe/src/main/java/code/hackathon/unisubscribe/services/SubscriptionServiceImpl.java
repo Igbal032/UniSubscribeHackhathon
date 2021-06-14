@@ -98,7 +98,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public List<SubscriptionDTO> getSubscriptionByCategory(long clientId, String category) {
 
-        Category category1 = Category.valueOf(category.toUpperCase());
+            String cc = category.toUpperCase();
+        Category category1 = Category.valueOf(cc);
         List<Subscription> subscriptionLiST = subscriptionDAO.allSubscriptions(clientId)
                 .stream().filter(w->w.getDeletedDate()==null&&w.getCategory().equals(category1))
                 .collect(Collectors.toList());
@@ -106,7 +107,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subscriptionDTOList;
     }
 
-    @Scheduled(fixedRate = 5000000)
+    @Scheduled(fixedRate = 1000)
     public List<Subscription> checkSubscriptions() {
         List<Subscription> subscriptions = subscriptionDAO.getAllSubscriptions();
         for (Subscription subscription : subscriptions.stream().filter(w->w.getDeletedDate()==null).collect(Collectors.toList())){

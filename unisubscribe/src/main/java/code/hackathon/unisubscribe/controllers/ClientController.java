@@ -14,16 +14,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+//@CrossOrigin(
+//        allowCredentials = "true",
+//        origins = "*",
+//        allowedHeaders = "*",
+//        methods = {RequestMethod.GET,RequestMethod.POST,RequestMethod.DELETE,RequestMethod.PUT}
+//)
 @Controller
 @RequestMapping("api/clients")
 @RequiredArgsConstructor
@@ -53,7 +54,6 @@ public class ClientController {
     public ResponseEntity<?> getSubscriptions(@RequestParam(required = false) Integer pageNumber,
                                               @RequestParam(required = false) Integer countOfData,
                                               HttpServletRequest httpServletRequest){
-        System.out.println("Hader"+httpServletRequest.getHeader("Authorization"));
         long userId = jwtTokenUtil.getUserId(httpServletRequest.getHeader("Authorization"));
         List<SubscriptionDTO> subscriptionDTOList = subscriptionService.allSubscriptions(userId);
         if (pageNumber!=null&&countOfData!=null){
@@ -74,10 +74,8 @@ public class ClientController {
                                                 @RequestParam(required = false) Integer countOfData,
                                                 HttpServletRequest httpServletRequest){
         long userId = jwtTokenUtil.getUserId(request.getHeader("Authorization"));
-        System.out.println("User  id " + userId+"---------------------");
         subscriptionService.addSubscription(userId, subscriptionDTO);
         List<SubscriptionDTO> subscriptionDTOList = subscriptionService.allSubscriptions(userId);
-        logger.info("Create Subscription");
         if (pageNumber!=null&&countOfData!=null){
             Pagination<?> pagination = subscriptionService.pagination(subscriptionDTOList,pageNumber,countOfData,httpServletRequest.getRequestURL());
             return new ResponseEntity<>(pagination, HttpStatus.OK);
@@ -96,6 +94,7 @@ public class ClientController {
         logger.info("Get Subscription");
         return new ResponseEntity<>(newSubscriptionDTO,HttpStatus.OK);
     }
+
     @DeleteMapping("subscriptions/delete/{subscriptionId}")
     public ResponseEntity<?> deleteSubscription(@PathVariable long subscriptionId,
                                                 @RequestParam(required = false) Integer pageNumber,

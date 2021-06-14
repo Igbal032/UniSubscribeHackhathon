@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +20,7 @@ import java.util.stream.Stream;
 public class CommonController {
 
     private final ClientService clientService;
-    private final OncePerRequestFilter corsFilter;
+//    private final OncePerRequestFilter corsFilter;
 
     @GetMapping("/getCategories")
     public ResponseEntity<List<String>> allCategories(){
