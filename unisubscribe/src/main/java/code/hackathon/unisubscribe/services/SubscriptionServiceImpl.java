@@ -106,7 +106,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subscriptionDTOList;
     }
 
-    @Scheduled(fixedRate = 50000)
+    @Scheduled(fixedRate = 5000000)
     public List<Subscription> checkSubscriptions() {
         List<Subscription> subscriptions = subscriptionDAO.getAllSubscriptions();
         for (Subscription subscription : subscriptions.stream().filter(w->w.getDeletedDate()==null).collect(Collectors.toList())){
